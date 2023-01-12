@@ -16,3 +16,5 @@ if sign == "-":
     print(difference(int(a), int(b)))
 if sign == "*":
     print(product(int(a), int(b)))
+else:
+    print("Моя твою не понимать")
