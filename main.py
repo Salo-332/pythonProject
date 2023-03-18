@@ -1,7 +1,5 @@
 import telebot
-
 token = "5785032666:AAHmweiukEUklqPhvcEjFw-q4IGZvJiehNU"
-
 bot = telebot.TeleBot(token)
 
 user_points = {}
@@ -41,6 +39,9 @@ def ege_points(message):
     else:
         user_points[message.chat.id] = int(points)
 
+
+def mama_egora(message):
+    pass
         # TODO: спросить про направления
 
 
@@ -48,7 +49,7 @@ def oge_points(message):
     points1 = message.text
 
     if not points1.isnumeric() or int(points1) > 100 or int(points1) < 0:
-        answer = bot.send_message(message.from_user.id, "Введите число от 0 до 70.")
+        answer = bot.send_message(message.from_user.id, "")
         bot.register_next_step_handler(answer, oge_points)
     else:
         user_points[message.chat.id] = int(points1)
