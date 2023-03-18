@@ -1,75 +1,58 @@
 import telebot
+
 token = "5785032666:AAHmweiukEUklqPhvcEjFw-q4IGZvJiehNU"
 
 bot = telebot.TeleBot(token)
 
-notes = {}
-
-@bot.message_handler(content_types=['text'])
-def start_message(message):
-    if message.text == "/start":
-        chat_id = message.chat.id
-        answer = bot.send_message(message.chat.id, "Привет, сейчас я помогу тебе подобрать учебное заведение по вкусу.")
-        bot.register_next_step_handler(answer, point1)
-        keyboard = telebot.types.InlineKeyboardMarkup()
-        button1 = telebot.types.InlineKeyboardButton(text="ВУЗ", callback_data="button1")
-        button2 = telebot.types.InlineKeyboardButton(text="ПТУ", callback_data="button2")
-        keyboard.row(button1, button2)
-        bot.send_message(message.from_user.id, "Сделай выбор какое учебное заведение мне для тебя искать?", reply_markup=keyboard)
+user_points = {}
 
 
+@bot.message_handler(commands=['start'])
+def select_direction(message):
+    bot.send_message(message.chat.id, "Привет, сейчас я помогу тебе подобрать учебное заведение по вкусу.")
+    keyboard = telebot.types.ReplyKeyboardMarkup()
+    button1 = telebot.types.KeyboardButton(text="ВУЗ")
+    button2 = telebot.types.KeyboardButton(text="ПТУ")
+    keyboard.row(button1, button2)
+    answer = bot.send_message(message.from_user.id, "Сделай выбор какое учебное заведение мне для тебя искать?",
+                              reply_markup=keyboard)
+    bot.register_next_step_handler(answer, direction_selected)
 
-    elif message.text == "/help":
-        bot.send_message(message.from_user.id, "Напиши /start")
+
+def direction_selected(message):
+    direction = message.text
+
+    if direction == "ВУЗ":
+        answer = bot.send_message(message.from_user.id, "Вы выбрали ВУЗ, введите ваши баллы ЕГЭ.")
+        bot.register_next_step_handler(answer, ege_points)
+    elif direction == "ПТУ":
+        answer = bot.send_message(message.from_user.id, "Вы  выбрали ПТУ, введите ваши баллы ОГЭ.")
+        bot.register_next_step_handler(answer, oge_points)
     else:
-        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
-
-@bot.callback_query_handler(func=lambda call: call.data == "button1")
-def callback_function1(callback_obj):
-    keyboard = telebot.types.InlineKeyboardMarkup()
-
-    bot.send_message(callback_obj.from_user.id, "вы выбрали ВУЗ, введите ваши баллы ЕГЭ.", reply_markup=keyboard)
+        select_direction(message)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "button2")
-def callback_function2(callback_obj):
-    keyboard = telebot.types.InlineKeyboardMarkup()
+def ege_points(message):
+    points = message.text
 
-    bot.send_message(callback_obj.from_user.id, "Вы  выбрали ПТУ, введите ваши баллы ОГЭ.", reply_markup=keyboard)
-
-
-@bot.message_handler(commands=['remind'])
-def remind(message):
-    user.id = message.chat.id
-    if user_id not in notes:
-        bot.send_message(user_id, "Вы мне ещё ничего не писали.")
+    if not points.isnumeric() or int(points) > 100 or int(points) < 0:
+        answer = bot.send_message(message.from_user.id, "Введите число от 0 до 100.")
+        bot.register_next_step_handler(answer, ege_points)
     else:
-        bot.sed_message(user_id, notes[user_id])
+        user_points[message.chat.id] = int(points)
 
-@bot.message_handler(content_types=['text'])
-def remember(message):
-    user_id = message.chat.id
-    notes[user_id] = message.text
-    bot.send_message(user_id, "Я запомнил, спасибо.")
+        # TODO: спросить про направления
 
 
-def point1(message):
-    chat_id = message.chat.id
-    text = message.text
-    if text == "Ответ 1":
-        answer = bot.send_message(chat_id, "Правильный ответ, второе задание...")
-        bot.register_next_step_handler(answer, point2)
+def oge_points(message):
+    points1 = message.text
 
-def point2(message):
-    chat_id = message.chat.id
-    text = message.text
-    if text == "Ответ 2":
-        answer = bot.send_message(chat_id, "Правильный ответ. Вы прошли квест!\nЧтобы повторить напишите /start.")
+    if not points1.isnumeric() or int(points1) > 100 or int(points1) < 0:
+        answer = bot.send_message(message.from_user.id, "Введите число от 0 до 70.")
+        bot.register_next_step_handler(answer, oge_points)
     else:
-        answer = bot.send_message(chat_id, "Нет, попробуйте еще раз...")
-        bot.register_next_step_handler(answer, point2)
+        user_points[message.chat.id] = int(points1)
+        # TODO: проверить, что балл корректный, сохранить его, спросить про направления
+
 
 bot.polling(none_stop=True)
-
-
-bot.infinity_polling()
