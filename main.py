@@ -1,7 +1,9 @@
+import time
 import telebot
 token = "5785032666:AAHmweiukEUklqPhvcEjFw-q4IGZvJiehNU"
 bot = telebot.TeleBot(token)
 
+user_subjects = {}
 user_points = {}
 
 
@@ -12,6 +14,7 @@ def select_direction(message):
     button1 = telebot.types.KeyboardButton(text="ВУЗ")
     button2 = telebot.types.KeyboardButton(text="ПТУ")
     keyboard.row(button1, button2)
+    time.sleep(1)
     answer = bot.send_message(message.from_user.id, "Сделай выбор какое учебное заведение мне для тебя искать?",
                               reply_markup=keyboard)
     bot.register_next_step_handler(answer, direction_selected)
@@ -30,6 +33,20 @@ def direction_selected(message):
         select_direction(message)
 
 
+def subjects(message):
+    subject = message.text
+
+    keyboard = telebot.types.ReplyKeyboardMarkup()
+    button3 = telebot.types.KeyboardButton(text='Математика(база)')
+    button4 = telebot.types.KeyboardButton(text='Математика(профиль)')
+    button5 = telebot.types.KeyboardButton(text='Русский язык')
+    button6 = telebot.types.KeyboardButton(text='Физика')
+    button7 = telebot.types.KeyboardButton(text='Информатика')
+    button8 = telebot.types.KeyboardButton(text='Иностранные языки')
+    button9 = telebot.types.KeyboardButton(text='Химия')
+    button10 = telebot.types.KeyboardButton(text='Биология')
+
+
 def ege_points(message):
     points = message.text
 
@@ -40,16 +57,11 @@ def ege_points(message):
         user_points[message.chat.id] = int(points)
 
 
-def mama_egora(message):
-    pass
-        # TODO: спросить про направления
-
-
 def oge_points(message):
     points1 = message.text
 
     if not points1.isnumeric() or int(points1) > 100 or int(points1) < 0:
-        answer = bot.send_message(message.from_user.id, "")
+        answer = bot.send_message(message.from_user.id, "Введите число от 0 до 100")
         bot.register_next_step_handler(answer, oge_points)
     else:
         user_points[message.chat.id] = int(points1)
